@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<odoo>
+    <!-- Search (Filter) View -->
+    <record id="view_estate_property_tag_search" model="ir.ui.view">
+        <field name="name">estate.property.tag.search</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <search string="Estate Property Tag">
+                <field name="name"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- List (Tree) View -->
+    <record id="view_estate_property_tag_tree" model="ir.ui.view">
+        <field name="name">estate.property.tag.tree</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_estate_property_tag_form" model="ir.ui.view">
+        <field name="name">estate.property.tag.form</field>
+        <field name="model">estate.property.tag</field>
+        <field name="arch" type="xml">
+            <form string="Real Estate Property Tag">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id='estate_property_tag_action' model='ir.actions.act_window'>
+        <field name="name">Estate Property Tags</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">estate.property.tag</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new property tag
+        </p>
+        </field>
+    </record>
+
+    <menuitem id="estate_property" name="Estate" sequence="0">
+        <menuitem id="estate_property_tag" name="Property Tags" action="estate_property_tag_action"/>
+    </menuitem>
+</odoo>

@@ -1,0 +1,122 @@
+version: '3.1'
+
+services:
+  traefik:
+    env_file: .env
+    restart: always
+    # The official v2 Traefik docker image
+    image: traefik:v2.9
+    # Enables the web UI and tells Traefik to listen to docker
+    command: 
+      - --api
+      # - --api.debug=true
+      - --api.insecure=false
+      - --log.level=INFO
+      - --providers.docker=true
+      - --providers.docker.exposedByDefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.email=${LETS_ENCRYPT_CONTACT_EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+    labels:
+      - "traefik.enable=true"
+      # http
+      - traefik.http.routers.traefik.rule=Host(`${TRAEFIK_HOSTNAME}`)
+      - traefik.http.routers.traefik.entrypoints=web
+      - traefik.http.middlewares.traefik-redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.routers.traefik.middlewares=traefik-redirect-to-https
+      - traefik.http.routers.traefik.service=api@internal
+      # https
+      - traefik.http.routers.traefik-secure.rule=Host(`${TRAEFIK_HOSTNAME}`)
+      - traefik.http.routers.traefik-secure.entrypoints=websecure
+      - traefik.http.routers.traefik-secure.service=api@internal
+      - traefik.http.routers.traefik-secure.tls=true
+      - traefik.http.routers.traefik-secure.tls.certresolver=le
+
+      - traefik.http.routers.traefik-secure.middlewares=traefik-auth
+      # Username: admin
+      # Password: tvs@traefik2023
+      # Generated using command -> echo $(htpasswd -nb admin tvs@traefik2023) | sed -e s/\\$/\\$\\$/g
+      - traefik.http.middlewares.traefik-auth.basicauth.users=admin:$$apr1$$KFzOU66d$$3rg2ecOezlMk/RZTFdQXa/
+      - traefik.http.services.api@internal.loadbalancer.server.port=8080
+    ports:
+      # The HTTP port
+      - "80:80"
+      - "443:443"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+  platform:
+    env_file: .env
+    restart: always
+    labels:
+      - traefik.enable=true
+      #----------------------------------------------- routers for: odoo --------------------------------------------------
+      # http
+      - traefik.http.routers.platform.rule=Host(`${PLATFORM_HOSTNAME}`)
+      - traefik.http.routers.platform.entrypoints=web
+      - traefik.http.middlewares.platform-redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.routers.platform.middlewares=platform-redirect-to-https@docker
+      - traefik.http.routers.platform.service=platform
+      # https
+      - traefik.http.routers.platform-secure.rule=Host(`${PLATFORM_HOSTNAME}`)
+      - traefik.http.routers.platform-secure.entrypoints=websecure
+      - traefik.http.routers.platform-secure.service=platform
+      - traefik.http.routers.platform-secure.tls=true
+      - traefik.http.routers.platform-secure.tls.certresolver=le
+      - traefik.http.routers.platform-secure.middlewares=gzip,sslheader,limit
+
+      #---------------------------------------- routes for: odoo/websocket ------------------------------------------------
+      # http 
+      - traefik.http.routers.platform-im.rule=Host(`${PLATFORM_HOSTNAME}`) && (PathPrefix(`/websocket`))
+      - traefik.http.routers.platform-im.entrypoints=web
+      - traefik.http.routers.platform-im.service=platform-im
+      # https 
+      - traefik.http.routers.platform-im-secure.rule=Host(`${PLATFORM_HOSTNAME}`) && (PathPrefix(`/websocket`))
+      - traefik.http.routers.platform-im-secure.entrypoints=websecure
+      - traefik.http.routers.platform-im-secure.service=platform-im
+      - traefik.http.routers.platform-im-secure.tls.certresolver=le
+      - traefik.http.routers.platform-im-secure.middlewares=gzip,sslheader,limit
+
+      #====================================================== services ===========================================================
+      - traefik.http.services.platform.loadbalancer.server.port=8069
+      - traefik.http.services.platform-im.loadbalancer.server.port=8072
+
+      #===================================================== middlewares =========================================================
+      - traefik.http.middlewares.gzip.compress=true
+      - traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https
+      - traefik.http.middlewares.limit.buffering.memRequestBodyBytes=20971520
+      - traefik.http.middlewares.limit.buffering.maxRequestBodyBytes=20971520
+    image: odoo:16
+    depends_on:
+      - db
+    # expose:
+    #   - 8069
+    # ports:
+    #   - "8069:8069"
+    volumes:
+      - platform-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    secrets:
+      - postgresql_password
+  db:
+    env_file: .env
+    restart: always
+    image: postgres:13
+    volumes:
+      - db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+volumes:
+  platform-data:
+  db-data:
+
+secrets:
+  postgresql_password:
+    file: secrets/pg_pass

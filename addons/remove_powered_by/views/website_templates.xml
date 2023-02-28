@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Remove Created by from Website client facing page -->
+    <!-- Overriding https://github.com/odoo/odoo/blob/16.0/addons/website/views/website_templates.xml#L236 -->
+    <template id="brand_promotion" inherit_id="web.brand_promotion">
+        <xpath expr="//t[@t-call='web.brand_promotion_message']" position="replace">
+        </xpath>
+    </template>
+
+
+    <!-- Remove Powered by from Survey client facing page -->
+    <!-- Overriding https://github.com/odoo/odoo/blob/16.0/addons/survey/views/survey_templates.xml#L51 -->
+    <template id="survey_brand_promotion" inherit_id="survey.layout">
+        <xpath expr="//div[hasclass('o_survey_brand_message')]" position="replace">
+            <div class="o_survey_navigation_wrapper d-inline-block" t-call="survey.survey_navigation">
+            </div>
+        </xpath>
+    </template>
+</odoo>

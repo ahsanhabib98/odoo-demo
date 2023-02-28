@@ -1,0 +1,34 @@
+version: '3.1'
+
+services:
+  platform:
+    env_file: .env
+    restart: always
+    image: odoo:16
+    depends_on:
+      - db
+    # expose:
+    #   - 8069
+    ports:
+      - "8069:8069"
+    volumes:
+      - platform-data:/var/lib/odoo
+      - ./config:/etc/odoo
+      - ./addons:/mnt/extra-addons
+    secrets:
+      - postgresql_password
+  db:
+    env_file: .env
+    restart: always
+    image: postgres:13
+    volumes:
+      - db-data:/var/lib/postgresql/data/pgdata
+    secrets:
+      - postgresql_password
+volumes:
+  platform-data:
+  db-data:
+
+secrets:
+  postgresql_password:
+    file: secrets/pg_pass
