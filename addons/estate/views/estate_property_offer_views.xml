@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<odoo>
+    <!-- Search (Filter) View -->
+    <record id="view_estate_property_offer_search" model="ir.ui.view">
+        <field name="name">estate.property.offer.search</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <search string="Estate Property Offer">
+                <field name="price"/>
+                <field name="partner_id"/>
+                <field name="status"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- List (Tree) View -->
+    <record id="view_estate_property_offer_tree" model="ir.ui.view">
+        <field name="name">estate.property.offer.tree</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="price"/>
+                <field name="partner_id"/>
+                <field name="status"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_estate_property_offer_form" model="ir.ui.view">
+        <field name="name">estate.property.offer.form</field>
+        <field name="model">estate.property.offer</field>
+        <field name="arch" type="xml">
+            <form string="Real Estate Property Offer">
+                <sheet>
+                     <group>
+                        <field name="price"/>
+                        <field name="partner_id"/>
+                        <field name="status"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id='estate_property_offer_action' model='ir.actions.act_window'>
+        <field name="name">Estate Property Offers</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">estate.property.offer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+          <p class="o_view_nocontent_smiling_face">
+            Create a new property offer
+        </p>
+        </field>
+    </record>
+
+    <menuitem id="estate_property" name="Estate" sequence="0">
+        <menuitem id="estate_property_offer" name="Property Offers" action="estate_property_offer_action"/>
+    </menuitem>
+</odoo>

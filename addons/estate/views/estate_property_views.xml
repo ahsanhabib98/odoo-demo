@@ -66,24 +66,39 @@
                              <field name="tag_ids" widget="many2many_tags"/>
                         </group>
                     </group>
-                    <group name="description" string="Description">
-                        <group>
-                            <field name="description"/>
-                            <field name="bedrooms"/>
-                            <field name="living_area"/>
-                            <field name="facades"/>
-                            <field name="garage"/>
-                            <field name="garden"/>
-                            <field name="garden_area"/>
-                            <field name="garden_orientation"/>
-                        </group>
-                    </group>
-                    <group name="other_info" string="Other Info">
-                        <group>
-                            <field name="user_id"/>
-                            <field name="buyer_id"/>
-                        </group>
-                    </group>
+                    <notebook>
+                        <page name="description" string="Description">
+                            <group>
+                                <field name="description"/>
+                                <field name="bedrooms"/>
+                                <field name="living_area"/>
+                                <field name="facades"/>
+                                <field name="garage"/>
+                                <field name="garden"/>
+                                <field name="garden_area"/>
+                                <field name="garden_orientation"/>
+                            </group>
+                        </page>
+                        <page name="offers" string="Offers">
+                             <group>
+                                <field name="offer_ids">
+                                    <form>
+                                        <group>
+                                            <field name="price"/>
+                                            <field name="partner_id"/>
+                                            <field name="status"/>
+                                        </group>
+                                    </form>
+                                </field>
+                            </group>
+                        </page>
+                        <page name="other_info" string="Other Info">
+                            <group>
+                                <field name="user_id"/>
+                                <field name="buyer_id"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
